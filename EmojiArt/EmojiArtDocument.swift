@@ -10,6 +10,7 @@ import SwiftUI
 
 class EmojiArtDocument: ObservableObject {
     static let palette: String = "😍🥰😉😊😂😁👿👾🐯"
+    @Published private(set) var selectedEmojis = Set<EmojiArt.Emoji>()
     
     // @Published // workaround with property wrappers
     private var emojiArt: EmojiArt = EmojiArt() {
@@ -17,7 +18,6 @@ class EmojiArtDocument: ObservableObject {
             objectWillChange.send()
         }
         didSet {
-            print("json = \(emojiArt.json?.utf8 ?? "nil")")
             UserDefaults.standard.set(emojiArt.json, forKey: EmojiArtDocument.untitled)
         }
     }
@@ -37,20 +37,48 @@ class EmojiArtDocument: ObservableObject {
     
     // MARK: Intents(s)
     
+    func reset() {
+        emojiArt = EmojiArt()
+        fetchBackgroundImageData()
+        selectedEmojis = Set<EmojiArt.Emoji>()
+    }
+    
+    func deleteSelection(){
+        for emoji in selectedEmojis {
+            emojiArt.removeEmoji(emoji)
+        }
+    }
+    
+    func selectEmoji(_ emoji: EmojiArt.Emoji) {
+        selectedEmojis.toggleMatching(emoji)
+    }
+    
+    func deselectEmojis() {
+        for emoji in selectedEmojis {
+            selectedEmojis.toggleMatching(emoji)
+        }
+    }
+    
     func addEmoji(_ emoji: String, at location: CGPoint, size: CGFloat) {
         emojiArt.addEmoji(emoji, x: Int(location.x), y: Int(location.y), size: Int(size))
     }
     
     func moveEmoji(_ emoji: EmojiArt.Emoji, by offset: CGSize){
+        selectedEmojis.remove(emoji)
         if let index = emojiArt.emojis.firstIndex(matching: emoji) {
             emojiArt.emojis[index].x += Int(offset.width)
             emojiArt.emojis[index].y += Int(offset.height)
+            selectedEmojis.insert(emojiArt.emojis[index])
         }
     }
     
+    //func setEmojiSize(_ emoji: EmojiArt.Emoji, by scale: CGFloat) 
+    
     func scaleEmoji(_ emoji: EmojiArt.Emoji, by scale: CGFloat){
+        selectedEmojis.remove(emoji)
         if let index = emojiArt.emojis.firstIndex(matching: emoji) {
             emojiArt.emojis[index].size = Int((CGFloat(emojiArt.emojis[index].size) * scale).rounded(.toNearestOrEven))
+            selectedEmojis.insert(emojiArt.emojis[index])
         }
     }
     

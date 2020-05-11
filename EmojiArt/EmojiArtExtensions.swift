@@ -137,3 +137,14 @@ extension String {
         return uniqued
     }
 }
+
+extension Set where Element: Hashable {
+    mutating func toggleMatching(_ selection: Element) {
+        if self.contains(selection) {
+            self.remove(selection)
+        } else {
+            self.insert(selection)
+        }
+        
+    }
+}

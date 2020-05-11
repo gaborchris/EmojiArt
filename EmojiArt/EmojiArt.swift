@@ -44,6 +44,12 @@ struct EmojiArt: Codable {
     
     private var uniqueEmojiId = 0
     
+    mutating func removeEmoji(_ emoji: Emoji) {
+        if let index = self.emojis.firstIndex(matching: emoji) {
+            emojis.remove(at: index)
+        }
+    }
+    
     mutating func addEmoji(_ text: String, x: Int, y: Int, size: Int) {
         uniqueEmojiId += 1
         emojis.append(Emoji(text: text, x: x, y: y, size: size, id: uniqueEmojiId))
